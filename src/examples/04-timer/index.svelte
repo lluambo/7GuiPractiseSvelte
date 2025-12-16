@@ -1,28 +1,27 @@
 <script lang="ts">
 	let elapsed = $state(0)
 	let duration = $state(5)
-	let interval: number
+	let intercal: ReturnType<typeof setInterval>
 
-	function start() {
-		interval = setInterval(() => {
-			elapsed += 0.1
-			if (elapsed > duration) {
-				elapsed = duration
-				clearInterval(interval)
+	function startTimer() {
+		intercal = setInterval(() => {
+			if (elapsed < duration) {
+				elapsed++
+			} else {
+				clearInterval(intercal)
 			}
-		}, 100)
+		}, 1000)
 	}
 
-	function reset() {
+	function resetTimer() {
+		clearInterval(intercal)
 		elapsed = 0
-		clearInterval(interval)
-		start()
+		startTimer()
 	}
-
 	$effect(() => {
 		if (!duration) return
-		start()
-		return () => clearInterval(interval)
+		startTimer()
+		return () => clearInterval(intercal)
 	})
 </script>
 
@@ -33,13 +32,13 @@
 			<progress max={duration} value={elapsed}></progress>
 		</label>
 
-		<div>{elapsed.toFixed(1)}s</div>
+		<div>{elapsed}s</div>
 	</div>
 
 	<label>
-		<span>Duration:</span>
-		<input type="range" bind:value={duration} min="1" max="10" />
+		<span>Set duration (seconds):</span>
+		<input type="range" bind:value={duration} min="1" max="20" />
 	</label>
 
-	<button onclick={reset}>Reset</button>
+	<button onclick={resetTimer}>Reset</button>
 </div>
