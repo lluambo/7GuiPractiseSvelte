@@ -11,6 +11,12 @@
 	])
 	let selected = $state<Person>()
 	let person = $state<Person>({ fName: '', lName: '' })
+
+	let prefix = $state('')
+	const filteredPeople = $derived(
+		prefix ? people.filter((p) => p.fName.startsWith(prefix) || p.lName.startsWith(prefix) ) : people
+	)
+
 </script>
 
 <h1>CRUD Example</h1>
@@ -18,14 +24,14 @@
 	<div class="search">
 		<label class="group">
 			<span>Filter prefix:</span>
-			<input type="text" />
+			<input type="text" bind:value={prefix} />
 		</label>
 	</div>
 
 	<label class="people">
 		<span class="sr-only">Names:</span>
 		<select bind:value={selected} size="5">
-			{#each people as p}
+			{#each filteredPeople as p}
 				<option value={p}>{p.fName}, {p.lName}</option>
 			{/each}
 		</select>
