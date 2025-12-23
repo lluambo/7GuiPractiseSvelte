@@ -1,127 +1,98 @@
 <script lang="ts">
 	type Person = {
-		name: string
-		surname: string
+		fName: string
+		lName: string
 	}
 
 	let people = $state([
-		{ name: 'Rich', surname: 'Harris' },
-		{ name: 'Ryan', surname: 'Carniato' },
-		{ name: 'Evan', surname: 'You' },
+		{ fname: 'Benin', surname: 'Baglehood' },
+		{ fname: 'Calvin', surname: 'Clamble' },
+		{ fname: 'Denise', surname: 'Dingleman' },
 	])
 	let selected = $state<Person>()
-	let person = $state({ name: '', surname: '' })
-
-	let prefix = $state('')
-	const filteredPeople = $derived(
-		prefix ? people.filter((p) => p.surname.toLowerCase().startsWith(prefix)) : people,
-	)
-
-	$effect(() => {
-		person = {
-			name: selected?.name ?? '',
-			surname: selected?.surname ?? '',
-		}
-	})
-
-	function createPerson() {
-		people.push(person)
-		clearFields()
-	}
-
-	function updatePerson() {
-		const index = people.indexOf(selected!)
-		people[index] = { name: person.name, surname: person.surname }
-	}
-
-	function deletePerson() {
-		people = people.filter((p) => p.name !== person.name || p.surname !== person.surname)
-		clearFields()
-	}
-
-	function clearFields() {
-		person = { name: '', surname: '' }
-	}
+	let person = $state<Person>({ fName: '', lName: '' })
 </script>
 
+<h1>CRUD Example</h1>
 <div class="container surface-2">
 	<div class="search">
 		<label class="group">
 			<span>Filter prefix:</span>
-			<input type="text" bind:value={prefix} />
+			<input type="text" />
 		</label>
 	</div>
 
 	<label class="people">
 		<span class="sr-only">Names:</span>
 		<select bind:value={selected} size="5">
-			{#each filteredPeople as person}
-				<option value={person}>{person.surname}, {person.name}</option>
+			{#each people as p}
+				<option value={p}>{p.fname}, {p.surname}</option>
 			{/each}
 		</select>
 	</label>
 
 	<div class="details">
 		<label class="group">
-			<span>Name:</span>
-			<input type="text" bind:value={person.name} />
+			<span>First Name:</span>
+			<input type="text" bind:value={person.fName} />
 		</label>
-
 		<label class="group">
-			<span>Surname:</span>
-			<input type="text" bind:value={person.surname} />
+			<span>Last Name:</span>
+			<input type="text" bind:value={person.lName} />
 		</label>
 	</div>
 
 	<div class="actions space-x">
-		<button onclick={createPerson}>Create</button>
-		<button onclick={updatePerson}>Update</button>
-		<button onclick={deletePerson}>Delete</button>
+		<button
+			onclick={() => {
+				if (person.fName && person.lName) {
+					people = [...people, { fname: person.fName, surname: person.lName }]
+					person = { fName: '', lName: '' }
+				}
+			}}
+		>
+			Create
+		</button>
+		<button
+			onclick={() => {
+				if (selected) {
+					people = people.map((p) =>
+						p === selected ? { fname: person.fName, surname: person.lName } : p,
+					)
+					selected = undefined
+					person = { fName: '', lName: '' }
+				}
+			}}
+			disabled={!selected}
+		>
+			Update
+		</button>
+		<button
+			onclick={() => {
+				if (selected) {
+					people = people.filter((p) => p !== selected)
+					selected = undefined
+					person = { fName: '', lName: '' }
+				}
+			}}
+			disabled={!selected}
+		>
+			Delete
+		</button>
 	</div>
 </div>
 
 <style>
 	.container {
-		width: 500px;
 		display: grid;
 		grid-template-areas:
-			'search .'
+			'search search'
 			'people details'
 			'actions actions';
-		grid-template-columns: 240px 1fr;
-		grid-auto-rows: auto;
-		gap: var(--size-3);
-		padding: var(--size-3);
-
-		.search {
-			grid-area: search;
-
-			.group {
-				display: grid;
-				grid-template-columns: 2fr 1fr;
-				align-items: baseline;
-			}
-		}
-
-		.people {
-			grid-area: people;
-		}
-
-		.details {
-			grid-area: details;
-			display: grid;
-			grid-template-columns: auto 1fr;
-			grid-template-rows: repeat(2, auto) 1fr;
-			align-items: baseline;
-			gap: var(--size-2);
-
-			.group {
-				display: contents;
-			}
-		}
-
-		.actions {
-			grid-area: actions;
-		}
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: auto 1fr auto;
+		gap: 1rem;
+		padding: 1rem;
+		border-radius: 0.5rem;
 	}
 </style>
